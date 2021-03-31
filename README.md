@@ -1,4 +1,4 @@
-# usercriptjs
+# userscriptjs
 
 dex.guru Live Chart for Coingecko
 
