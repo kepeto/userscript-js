@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CoinGecko plus plus
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  add external tools button to current coin
 // @author       kepeto
 // @match        https://*.coingecko.com/*/coins/*
