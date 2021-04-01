@@ -31,7 +31,7 @@
             </map>`
         );
 
-        $("#btn").css("position", "fixed").css("top", "3%").css("left", "40%");
+        $("#btn").css("position", "fixed").css("top", "3%").css("left", "3%");
 
     }
 })();
