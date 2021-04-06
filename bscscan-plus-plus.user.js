@@ -36,7 +36,7 @@
             <map name="coinmap">
               <area shape="rect" coords="5,6,120,35" alt="Pancake Swap" href="${pancakeUrl}" target="_blank">
               <area shape="rect" coords="5,41,120,76" alt="dex.guru" href="${dexGuruUrl}" target="_blank">
-              <area shape="rect" coords="5,84,120,120" alt="dex.guru" href="${dexGuruUrl}" target="_blank">
+              <area shape="rect" coords="5,84,120,120" alt="dex.guru" href="${pooChartUrl}" target="_blank">
             </map>`
             );
 
