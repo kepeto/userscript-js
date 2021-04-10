@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name         Tokenfomo.io add some additional data
+// @name         Tokenfomo plus
 // @namespace    http://tampermonkey.net/
-// @version      0.1
-// @description  add some additional data to tokenfomo
-// @author       kepeto and billyriantono
-// @match        https://*.tokenfomo.io/
+// @version      0.2
+// @description  add external data
+// @author       kepeto
+// @match        https://*.tokenfomo.io/*
 // @icon         https://www.google.com/s2/favicons?domain=tokenfomo.io
 // @require      http://code.jquery.com/jquery-latest.js
 // ==/UserScript==
