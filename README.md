@@ -7,3 +7,7 @@
 - BSC Scan Plus Plus
 
 [![alt text](https://img.shields.io/badge/install%20directly%20using-greasemonkey-green "install using userscript")](https://github.com/kepeto/userscript-js/raw/main/bscscan-plus-plus.user.js)
+
+- Tokenfomo Plus Plus
+
+[![alt text](https://img.shields.io/badge/install%20directly%20using-greasemonkey-green "install using userscript")](https://github.com/billyriantono/userscript-js/raw/main/tokenfomo-plus.user.js)
