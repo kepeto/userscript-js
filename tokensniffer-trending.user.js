@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         tokensniffer.com trending table add some additional data
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  add some additional data to tokensniffer trending table
 // @author       kepeto & billyriantono
 // @match        https://*.tokensniffer.com/tokens/trending
