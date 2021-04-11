@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         tokensniffer.com add some additional data
 // @namespace    http://tampermonkey.net/
-// @version      0.2
+// @version      0.3
 // @description  add some additional data to tokensniffer
 // @author       kepeto & billyriantono
 // @match        https://*.tokensniffer.com/tokens/new
