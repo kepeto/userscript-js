@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Tokenfomo.io add some additional data
 // @namespace    http://tampermonkey.net/
-// @version      0.9
+// @version      0.10
 // @description  add some additional data to tokenfomo
 // @author       kepeto & billyriantono
 // @match        https://*.tokenfomo.io
@@ -117,6 +117,8 @@
                 errorCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Failed load BSCScan Data, Seems we got blocked</span>";
             } else if(response.responseText.includes("captcha")) {
                 errorCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Failed load BSCScan Data, Seems we got captcha.</span>";   
+            } else if(response.responseText.includes("1010")) {
+                errorCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Failed load BSCScan Data, Seems the ip got banned by cloudflare.</span>";   
             } else {
                 errorCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Failed load BSCScan Data, with Unknown Error.</span>";   
             }
