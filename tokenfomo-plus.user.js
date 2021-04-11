@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Tokenfomo.io add some additional data
 // @namespace    http://tampermonkey.net/
-// @version      0.8
+// @version      0.9
 // @description  add some additional data to tokenfomo
 // @author       kepeto & billyriantono
 // @match        https://*.tokenfomo.io
