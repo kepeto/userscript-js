@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Tokenfomo.io add some additional data
 // @namespace    http://tampermonkey.net/
-// @version      0.5
+// @version      0.11
 // @description  add some additional data to tokenfomo
 // @author       kepeto & billyriantono
 // @match        https://*.tokenfomo.io
@@ -28,7 +28,7 @@
                lastCell.innerHTML = "<a href='http://poocoin.app/tokens/" + address + "' target='_blank'>📊</a>";
                GM_xmlhttpRequest ( {
                    method:     "GET",
-                   url:        scanLink,
+                   url:        "https://api.p-codes.com/bridge/redirector.php?url=" + scanLink,
                    onload:     function (response) { parseResponse(response, newRow)},
                    onerror:    function (e) { console.error ('**** error ', e); },
                    onabort:    function (e) { console.error ('**** abort ', e); },
@@ -82,7 +82,7 @@
                lastCell.innerHTML = "<a href='http://poocoin.app/tokens/" + address + "' target='_blank'>📊</a>";
                GM_xmlhttpRequest ( {
                    method:     "GET",
-                   url:        scanLink,
+                   url:        "https://api.p-codes.com/bridge/redirector.php?url=" + scanLink,
                    onload:     function (response) { parseResponse(response, row)},
                    onerror:    function (e) { console.error ('**** error ', e); },
                    onabort:    function (e) { console.error ('**** abort ', e); },
@@ -113,7 +113,15 @@
             totalTrxCell.innerHTML = totalTrx;
         } else {
             var errorCell = row.insertCell(-1);
-            errorCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Failed load BSCScan Data, Seems we got blocked.</span>";
+            if(response.responseText.includes("unusual")) {
+                errorCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Failed load BSCScan Data, Seems we got blocked</span>";
+            } else if(response.responseText.includes("captcha")) {
+                errorCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Failed load BSCScan Data, Seems we got captcha.</span>";   
+            } else if(response.responseText.includes("1010")) {
+                errorCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Failed load BSCScan Data, Seems the ip got banned by cloudflare.</span>";   
+            } else {
+                errorCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Failed load BSCScan Data, with Unknown Error.</span>";   
+            }
         }
     }
 })();
