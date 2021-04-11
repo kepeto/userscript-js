@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Tokenfomo.io add some additional data
 // @namespace    http://tampermonkey.net/
-// @version      0.7
+// @version      0.8
 // @description  add some additional data to tokenfomo
 // @author       kepeto & billyriantono
 // @match        https://*.tokenfomo.io
@@ -113,7 +113,11 @@
             totalTrxCell.innerHTML = totalTrx;
         } else {
             var errorCell = row.insertCell(-1);
-            errorCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Failed load BSCScan Data, Seems we got blocked. Response : " + response.responseText + "</span>";
+            if(response.responseText.includes("unusual")) {
+                errorCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Failed load BSCScan Data, Seems we got blocked</span>";
+            } else {
+                errorCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Failed load BSCScan Data, with Unknown Error.</span>";   
+            }
         }
     }
 })();
