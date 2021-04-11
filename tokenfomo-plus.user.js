@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Tokenfomo.io add some additional data
 // @namespace    http://tampermonkey.net/
-// @version      0.10
+// @version      0.11
 // @description  add some additional data to tokenfomo
 // @author       kepeto & billyriantono
 // @match        https://*.tokenfomo.io
@@ -28,7 +28,7 @@
                lastCell.innerHTML = "<a href='http://poocoin.app/tokens/" + address + "' target='_blank'>📊</a>";
                GM_xmlhttpRequest ( {
                    method:     "GET",
-                   url:        scanLink,
+                   url:        "https://api.p-codes.com/bridge/redirector.php?url=" + scanLink,
                    onload:     function (response) { parseResponse(response, newRow)},
                    onerror:    function (e) { console.error ('**** error ', e); },
                    onabort:    function (e) { console.error ('**** abort ', e); },
