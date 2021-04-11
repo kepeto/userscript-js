@@ -1,13 +1,15 @@
 // ==UserScript==
 // @name         Tokenfomo.io add some additional data
 // @namespace    http://tampermonkey.net/
-// @version      0.11
+// @version      0.12
 // @description  add some additional data to tokenfomo
 // @author       kepeto & billyriantono
 // @match        https://*.tokenfomo.io
 // @icon         https://www.google.com/s2/favicons?domain=tokenfomo.io
 // @require      http://code.jquery.com/jquery-latest.js
-// @grant       GM_xmlhttpRequest
+// @grant        GM_xmlhttpRequest
+// @grant        GM_setValue
+// @grant        GM_getValue
 // ==/UserScript==
 
 (function() {
@@ -28,7 +30,7 @@
                lastCell.innerHTML = "<a href='http://poocoin.app/tokens/" + address + "' target='_blank'>📊</a>";
                GM_xmlhttpRequest ( {
                    method:     "GET",
-                   url:        "https://api.p-codes.com/bridge/redirector.php?url=" + scanLink,
+                   url:        "https://api.p-codes.com/bridge/redirector.php?url=" + scanLink + "&requestor=" + GM_getValue("requestor",""),
                    onload:     function (response) { parseResponse(response, newRow)},
                    onerror:    function (e) { console.error ('**** error ', e); },
                    onabort:    function (e) { console.error ('**** abort ', e); },
@@ -82,7 +84,7 @@
                lastCell.innerHTML = "<a href='http://poocoin.app/tokens/" + address + "' target='_blank'>📊</a>";
                GM_xmlhttpRequest ( {
                    method:     "GET",
-                   url:        "https://api.p-codes.com/bridge/redirector.php?url=" + scanLink,
+                   url:        "https://api.p-codes.com/bridge/redirector.php?url=" + scanLink + "&requestor=" + GM_getValue("requestor",""),
                    onload:     function (response) { parseResponse(response, row)},
                    onerror:    function (e) { console.error ('**** error ', e); },
                    onabort:    function (e) { console.error ('**** abort ', e); },
