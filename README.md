@@ -14,4 +14,8 @@
 
 - TokenSniffer Plus Plus
 
+New Token : 
 [![alt text](https://img.shields.io/badge/install%20directly%20using-greasemonkey-green "install using userscript")](https://github.com/kepeto/userscript-js/raw/main/tokensniffer-plus.user.js)
+
+Trending Token : 
+[![alt text](https://img.shields.io/badge/install%20directly%20using-greasemonkey-green "install using userscript")](https://github.com/kepeto/userscript-js/raw/main/tokensniffer-trending.user.js)
