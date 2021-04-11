@@ -115,6 +115,8 @@
             var errorCell = row.insertCell(-1);
             if(response.responseText.includes("unusual")) {
                 errorCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Failed load BSCScan Data, Seems we got blocked</span>";
+            } else if(response.responseText.includes("captcha")) {
+                errorCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Failed load BSCScan Data, Seems we got captcha.</span>";   
             } else {
                 errorCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Failed load BSCScan Data, with Unknown Error.</span>";   
             }
