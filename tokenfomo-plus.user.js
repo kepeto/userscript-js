@@ -8,6 +8,7 @@
 // @icon         https://www.google.com/s2/favicons?domain=tokenfomo.io
 // @require      http://code.jquery.com/jquery-latest.js
 // @grant        GM_xmlhttpRequest
+// @grant        GM_registerMenuCommand
 // @grant        GM_setValue
 // @grant        GM_getValue
 // ==/UserScript==
@@ -15,6 +16,13 @@
 (function() {
     'use strict';
 
+    GM_registerMenuCommand("Set requestor", setRequestor);
+
+    function setRequestor() {
+        var req = prompt("Who are you??");
+        GM_setValue("requestor", req);
+    }    
+    
     var mutationObserver = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             var newRow = mutation.addedNodes[0];
