@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         tokensniffer.com trending table add some additional data
 // @namespace    http://tampermonkey.net/
-// @version      0.3
+// @version      0.4
 // @description  add some additional data to tokensniffer trending table
 // @author       kepeto & billyriantono
 // @match        https://*.tokensniffer.com/tokens/trending
@@ -23,8 +23,43 @@
     function setRequestor() {
         var req = prompt("Who are you??");
         GM_setValue("requestor", req);
-    }    
-    
+    }
+
+    const bitqueryHeaders = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:87.0) Gecko/20100101 Firefox/87.0",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "X-API-KEY": "BQYvhnv04csZHaprIBZNwtpRiDIwEIW9",
+        "Origin": "https://graphql.bitquery.io",
+        "Referer": "https://graphql.bitquery.io"
+    };
+    //0x55d398326f99059ff775485246999027b3197955
+    //0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c
+    const getBNBUSDQuery = JSON.stringify({
+            "query": "{  ethereum(network: bsc) {    dexTrades(     baseCurrency: {is: \"0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c\" } quoteCurrency: {is: \"0x55d398326f99059ff775485246999027b3197955\"}  options: {desc: [\"block.height\", \"transaction.index\"], limit: 1} ) { block {       height      timestamp {          time(format: \"%Y-%m-%d %H:%M:%S\")      }      }     transaction {        index    }     baseCurrency {        symbol      }    quoteCurrency {       symbol     }     quotePrice   } }}",
+            "variables": {}
+        });
+
+    function getPriceQuery(address) {
+        var requestData = JSON.stringify({
+            "query": "{  ethereum(network: bsc) {    dexTrades(     baseCurrency: {is: \"" + address + "\" } quoteCurrency: {is: \"0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c\"}  options: {desc: [\"block.height\", \"transaction.index\"], limit: 1} ) { block {       height      timestamp {          time(format: \"%Y-%m-%d %H:%M:%S\")      }      }     transaction {        index    }     baseCurrency {        symbol      }    quoteCurrency {       symbol     }     quotePrice   } }}",
+            "variables": {}
+        });
+        return requestData;
+    };
+
+    GM_xmlhttpRequest ( {
+                   method:     "POST",
+                   url:        "https://graphql.bitquery.io/",
+                   headers:    bitqueryHeaders,
+                   data:       getBNBUSDQuery,
+                   onload:     function (response) { parseBNBUSDResponse(response)},
+                   onerror:    function (e) { console.error ('**** error ', e); },
+                   onabort:    function (e) { console.error ('**** abort ', e); },
+                   ontimeout:  function (e) { console.error ('**** timeout ', e); }
+               });
+
+
     $(document).ready(function() {
        parseBody();
     });
@@ -57,7 +92,7 @@
                GM_xmlhttpRequest ( {
                    method:     "GET",
                    url:        "https://api.p-codes.com/bridge/redirector.php?url=" + scanLink + "&requestor=" + GM_getValue("requestor",""),
-                   onload:     function (response) { parseResponse(response, row)},
+                   onload:     function (response) { parseResponse(response, row, address)},
                    onerror:    function (e) { console.error ('**** error ', e); },
                    onabort:    function (e) { console.error ('**** abort ', e); },
                    ontimeout:  function (e) { console.error ('**** timeout ', e); }
@@ -68,7 +103,7 @@
     }
 
 
-    function parseResponse (response, row) {
+    function parseResponse (response, row, address) {
         var parser = new DOMParser ();
         if(response.responseText == null) {
           return;
@@ -85,6 +120,17 @@
             var totalTrx = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>" + tokenInfo[3].children[1].children[1].innerText.trim() + "</span>";
             var totalTrxCell = row.insertCell(-1);
             totalTrxCell.innerHTML = totalTrx;
+
+            GM_xmlhttpRequest ( {
+                   method:     "POST",
+                   url:        "https://graphql.bitquery.io/",
+                   headers:    bitqueryHeaders,
+                   data:       getPriceQuery(address),
+                   onload:     function (response) { parseQueryResponse(response, row, tokenInfo[1].children[1].children[0].getAttribute('title'))},
+                   onerror:    function (e) { console.error ('**** error ', e); },
+                   onabort:    function (e) { console.error ('**** abort ', e); },
+                   ontimeout:  function (e) { console.error ('**** timeout ', e); }
+               });
         } else {
             var errorCell = row.insertCell(-1);
             if(response.responseText.includes("unusual")) {
@@ -96,6 +142,31 @@
             } else {
                 errorCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Failed load BSCScan Data, with Unknown Error.</span>";
             }
+        }
+    }
+
+    function parseBNBUSDResponse (response) {
+        if(response.responseText == null) {
+          return;
+        }
+        var jsonDoc = JSON.parse(response.responseText);
+        var tokenData = jsonDoc.data;
+        GM_setValue("BNB_USD", ((tokenData.ethereum.dexTrades[0].quotePrice) ? tokenData.ethereum.dexTrades[0].quotePrice : 0));
+    }
+
+    function parseQueryResponse (response, row, totalSupply) {
+        if(response.responseText == null) {
+          return;
+        }
+        var jsonDoc = JSON.parse(response.responseText);
+        var tokenData = jsonDoc.data;
+        if(tokenData.ethereum.dexTrades != null && tokenData.ethereum.dexTrades[0]) {
+            var priceData = tokenData.ethereum.dexTrades[0].quotePrice * GM_getValue("BNB_USD", 0);
+            var priceCell = row.insertCell(-1);
+            priceCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Price : $" + String(priceData) + ", Market Cap : " + (Number(totalSupply.replaceAll(/\s/g,'').replaceAll(",","")) * priceData) + "</span>";
+        } else {
+            var errorCell = row.insertCell(-1);
+            errorCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Price : $ 0, Market cap : $ 0</span>";
         }
     }
 })();
