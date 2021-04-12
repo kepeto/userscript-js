@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         tokensniffer.com add some additional data
 // @namespace    http://tampermonkey.net/
-// @version      0.4
+// @version      0.5
 // @description  add some additional data to tokensniffer
 // @author       kepeto & billyriantono
 // @match        https://*.tokensniffer.com/tokens/new
-// @icon         https://www.google.com/s2/favicons?domain=tokenfomo.io
+// @icon         https://www.google.com/s2/favicons?domain=tokensniffer.com
 // @require      http://code.jquery.com/jquery-latest.js
 // @grant        GM_xmlhttpRequest
 // @grant        GM_registerMenuCommand
