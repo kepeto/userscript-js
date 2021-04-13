@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Tokenfomo.io add some additional data
 // @namespace    http://tampermonkey.net/
-// @version      0.15
+// @version      0.16
 // @description  add some additional data to tokenfomo
 // @author       kepeto & billyriantono
 // @match        https://*.tokenfomo.io
@@ -37,6 +37,10 @@
             "query": "{  ethereum(network: bsc) {    dexTrades(     baseCurrency: {is: \"0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c\" } quoteCurrency: {is: \"0x55d398326f99059ff775485246999027b3197955\"}  options: {desc: [\"block.height\", \"transaction.index\"], limit: 1} ) { block {       height      timestamp {          time(format: \"%Y-%m-%d %H:%M:%S\")      }      }     transaction {        index    }     baseCurrency {        symbol      }    quoteCurrency {       symbol     }     quotePrice   } }}",
             "variables": {}
         });
+
+    function getTokenInfoQuery(address) {
+      return "{\"query\":\"query ($network: EthereumNetwork!,                              $token: String!,                              $from: ISO8601DateTime,                              $till: ISO8601DateTime){                          ethereum(network: $network){                            transfers(currency: {is: $token}                            amount: {gt: 0}                            date: {since: $from till: $till}                            ){                              currency{                                symbol                              }                              median: amount(calculate: median)                              average: amount(calculate: average)                              amount                              count                              days: count(uniq: dates)                              sender_count: count(uniq: senders)                              receiver_count: count(uniq: receivers)                              min_date:minimum(of: time)                              max_date:maximum(of: time)                            }                          }                        }\",\"variables\":{\"limit\":10,\"offset\":0,\"network\":\"bsc\",\"token\":\"" + address +"\"}}";
+    }
 
     function getPriceQuery(address) {
         var requestData = JSON.stringify({
@@ -74,6 +78,7 @@
             parseBodyResponse(newRow);
         });
     });
+
 
     $(document).ready(function() {
        parseBody();
@@ -135,6 +140,7 @@
 
     function parseBody() {
        var table = document.querySelector("body > div > div > main > div > table");
+       table.style.width = "100%";
        var rows = document.querySelectorAll("body > div > div > main > div > table > tbody > tr");
        var index = 0;
        rows.forEach(row => {
@@ -174,7 +180,7 @@
                    url:        "https://graphql.bitquery.io/",
                    headers:    bitqueryHeaders,
                    data:       getPriceQuery(address),
-                   onload:     function (response) { parseQueryResponse(response, row, tokenInfo[1].children[1].children[0].getAttribute('title'))},
+                   onload:     function (response) { parseQueryResponse(response, row, address, tokenInfo[1].children[1].children[0].getAttribute('title'))},
                    onerror:    function (e) { console.error ('**** error ', e); },
                    onabort:    function (e) { console.error ('**** abort ', e); },
                    ontimeout:  function (e) { console.error ('**** timeout ', e); }
@@ -203,7 +209,7 @@
         GM_setValue("BNB_USD", ((tokenData.ethereum.dexTrades[0].quotePrice) ? tokenData.ethereum.dexTrades[0].quotePrice : 0));
     }
 
-    function parseQueryResponse (response, row, totalSupply) {
+    function parseQueryResponse (response, row, address, totalSupply) {
         if(response.responseText == null) {
           return;
         }
@@ -213,9 +219,36 @@
             var priceData = tokenData.ethereum.dexTrades[0].quotePrice * GM_getValue("BNB_USD", 0);
             var priceCell = row.insertCell(-1);
             priceCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Price : $" + priceData + "<br/>Market Cap : " + (Number(totalSupply.replaceAll(/\s/g,'').replaceAll(",","")) * priceData) + "</span>";
+
+            GM_xmlhttpRequest ( {
+                   method:     "POST",
+                   url:        "https://graphql.bitquery.io/",
+                   headers:    bitqueryHeaders,
+                   data:       getTokenInfoQuery(address),
+                   onload:     function (response) { parseTotalInfoQuery(response, row)},
+                   onerror:    function (e) { console.error ('**** error ', e); },
+                   onabort:    function (e) { console.error ('**** abort ', e); },
+                   ontimeout:  function (e) { console.error ('**** timeout ', e); }
+               });
         } else {
             var errorCell = row.insertCell(-1);
             errorCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Price : $ 0<br/>Market cap : $ 0</span>";
+        }
+    }
+
+    function parseTotalInfoQuery(response, row) {
+      if(response.responseText == null) {
+          return;
+        }
+        var jsonDoc = JSON.parse(response.responseText);
+        var tokenData = jsonDoc.data;
+        var tokenInfoCell = row.insertCell(-1);
+        if(tokenData.ethereum.transfers) {
+            var tokenTotalTrx = tokenData.ethereum.transfers[0].count;
+            var tokenLastTrx = tokenData.ethereum.transfers[0].max_date;
+            tokenInfoCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Total Trx : " + tokenTotalTrx + " <br/> Last Tx : " + new Date(tokenLastTrx).toString() + "</span>";
+        } else {
+            tokenInfoCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>No Token Info Yet</span>";
         }
     }
 
