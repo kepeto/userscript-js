@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Tokenfomo.io add some additional data
 // @namespace    http://tampermonkey.net/
-// @version      0.16
+// @version      0.17
 // @description  add some additional data to tokenfomo
 // @author       kepeto & billyriantono
 // @match        https://*.tokenfomo.io
@@ -22,6 +22,7 @@
 
     GM_registerMenuCommand("Set requestor", setRequestor);
     GM_registerMenuCommand("Set minimum address holders", setHolders);
+    GM_registerMenuCommand("Set maximum token age (hour)", setTokenAge);
 
     const bitqueryHeaders = {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:87.0) Gecko/20100101 Firefox/87.0",
@@ -58,6 +59,11 @@
     function setHolders() {
         var req = prompt("How much minimum total holder want to show ? ( default : 10 )");
         GM_setValue("min_holders", req);
+    }
+
+    function setTokenAge() {
+        var req = prompt("Maximum token age (in hour) ? ( default : 6H )");
+        GM_setValue("max_token_age", req);
     }
 
     GM_xmlhttpRequest ( {
@@ -98,6 +104,11 @@
         }
     });
 
+    var formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+    });
+
     function wait(ms){
        var start = new Date().getTime();
        var end = start;
@@ -108,11 +119,14 @@
 
     function parseBodyResponse(row) {
         var scanLink = row.childNodes[3].childNodes[0].getAttribute('href');
+        var tokenAge = row.childNodes[5].childNodes[0].nodeValue;
+
         if(scanLink.includes("etherscan")) {
                row.style.display = "none";
         } else {
                var addressInfo = scanLink.split("/");
                var address = addressInfo[addressInfo.length - 1];
+               var max_token_age = GM_getValue("max_token_age", 6);
 
                var pooCoinUrl = "http://poocoin.app/tokens/" + address;
                var pancakeSwapUrl = "https://exchange.pancakeswap.finance/#/swap?outputCurrency=" + address;
@@ -127,14 +141,24 @@
                bscScanCell.style.width = "auto";
                bscScanCell.innerHTML = "<a href='" + bscscanUrl + "' target='_blank'><img src='" + bscLogo + "' style='width: 24px'></a>";
 
-               GM_xmlhttpRequest ( {
-                   method:     "GET",
-                   url:        "https://api.p-codes.com/bridge/redirector.php?url=" + scanLink + "&requestor=" + GM_getValue("requestor",""),
-                   onload:     function (response) { parseResponse(response, row, address)},
-                   onerror:    function (e) { console.error ('**** error ', e); },
-                   onabort:    function (e) { console.error ('**** abort ', e); },
-                   ontimeout:  function (e) { console.error ('**** timeout ', e); }
-               });
+               var isProcessed = false;
+
+               if(tokenAge.match(/s|m/g)) {
+                  isProcessed = true;
+               } else {
+                   isProcessed = (tokenAge.replace("h", "") <= max_token_age)
+               }
+
+               if(isProcessed) {
+                   GM_xmlhttpRequest ( {
+                       method:     "GET",
+                       url:        "https://api.p-codes.com/bridge/redirector.php?url=" + scanLink + "&requestor=" + GM_getValue("requestor",""),
+                       onload:     function (response) { parseResponse(response, row, address)},
+                       onerror:    function (e) { console.error ('**** error ', e); },
+                       onabort:    function (e) { console.error ('**** abort ', e); },
+                       ontimeout:  function (e) { console.error ('**** timeout ', e); }
+                   });
+               }
          }
     }
 
@@ -218,7 +242,13 @@
         if(tokenData.ethereum.dexTrades != null && tokenData.ethereum.dexTrades[0]) {
             var priceData = tokenData.ethereum.dexTrades[0].quotePrice * GM_getValue("BNB_USD", 0);
             var priceCell = row.insertCell(-1);
-            priceCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Price : $" + priceData + "<br/>Market Cap : " + (Number(totalSupply.replaceAll(/\s/g,'').replaceAll(",","")) * priceData) + "</span>";
+            var marketCap = formatter.format(Number(totalSupply.replaceAll(/\s/g,'').replaceAll(",","")) * priceData);
+
+            if(!isNaN(priceData)) {
+                priceData = priceData.toFixed(20);
+            }
+
+            priceCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Price : $" + priceData + "<br/>Market Cap : " + marketCap + "</span>";
 
             GM_xmlhttpRequest ( {
                    method:     "POST",
