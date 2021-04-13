@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Tokenfomo.io add some additional data
 // @namespace    http://tampermonkey.net/
-// @version      0.18
+// @version      0.20
 // @description  add some additional data to tokenfomo
 // @author       kepeto & billyriantono
 // @match        https://*.tokenfomo.io
@@ -176,7 +176,8 @@
 
     function parseBody() {
        var table = document.querySelector("body > div > div > main > div > table");
-       table.style.width = "100%";
+       table.style.width = "80%";
+       table.style.overflow = "auto";
        var rows = document.querySelectorAll("body > div > div > main > div > table > tbody > tr");
        var index = 0;
        rows.forEach(row => {
@@ -273,13 +274,15 @@
                    ontimeout:  function (e) { console.error ('**** timeout ', e); }
                });
         } else {
-            var errorCell = row.insertCell(-1);
-            errorCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Price : $ 0<br/>Market cap : $ 0</span>";
+            //var errorCell = row.insertCell(-1);
+            //errorCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Price : $ 0<br/>Market cap : $ 0</span>";
+            row.style.display = "none";
         }
     }
 
     function parseTotalInfoQuery(response, row) {
       if(response.responseText == null) {
+          row.style.display = "none";
           return;
         }
         var jsonDoc = JSON.parse(response.responseText);
@@ -295,7 +298,7 @@
                 row.style.display = "none";
                 return;
             }
-            tokenInfoCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Total Trx : " + tokenTotalTrx + " <br/> Last Tx : " + new Date(tokenLastTrx).toString() + "</span>";
+            tokenInfoCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>Total Trx : " + tokenTotalTrx + " <br/> Last Tx : " + new Date(tokenLastTrx).toLocaleString() + "</span>";
         } else {
             tokenInfoCell.innerHTML = "<span style='font-family: monospace,monospace;color: #696969;font-size:80%;'>No Token Info Yet</span>";
         }
